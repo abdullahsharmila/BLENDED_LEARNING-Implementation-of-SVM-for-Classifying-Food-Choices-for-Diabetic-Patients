@@ -1,6 +1,6 @@
-# BLENDED LEARNING
-# Implementation of Support Vector Machine for Classifying Food Choices for Diabetic Patients
-
+## BLENDED LEARNING
+## Implementation of Support Vector Machine for Classifying Food Choices for Diabetic Patients
+### DATE:21-05-25
 ## AIM:
 To implement a Support Vector Machine (SVM) model to classify food items and optimize hyperparameters for better accuracy.
 
@@ -9,38 +9,36 @@ To implement a Support Vector Machine (SVM) model to classify food items and opt
 2. Anaconda – Python 3.7 Installation / Jupyter notebook
 
 ## Algorithm
-1. **Load Data**  
-   Import and prepare the dataset to initiate the analysis workflow.
 
-2. **Explore Data**  
-   Examine the data to understand key patterns, distributions, and feature relationships.
+## Algorithm
 
-3. **Select Features**  
-   Choose the most impactful features to improve model accuracy and reduce complexity.
-
-4. **Split Data**  
-   Partition the dataset into training and testing sets for validation purposes.
-
-5. **Scale Features**  
-   Normalize feature values to maintain consistent scales, ensuring stability during training.
-
-6. **Train Model with Hyperparameter Tuning**  
-   Fit the model to the training data while adjusting hyperparameters to enhance performance.
-
-7. **Evaluate Model**  
-   Assess the model’s accuracy and effectiveness on the testing set using performance metrics.
+1.  **Load Data:** Read `food_items_binary.csv` into a pandas DataFrame.
+2.  **Explore (Optional):** Display initial rows and column names.
+3.  **Select Features & Target:** Define features (Calories, Fat, Sat. Fat, Sugars, Fiber, Protein) and the binary target ('class'). Separate into `X` and `y`.
+4.  **Split Data:** Use `train_test_split` (e.g., 70% train, 30% test, `random_state=42`).
+5.  **Scale Features:** Initialize and fit `StandardScaler` on training data, then transform both training and testing sets.
+6.  **Tune & Train SVM:**
+    * Initialize `SVC()`.
+    * Define `param_grid` for 'C', 'kernel' ('linear', 'rbf'), and 'gamma' ('scale', 'auto').
+    * Use `GridSearchCV` (with `cv=5`, `scoring='accuracy'`) to find the best hyperparameters by fitting on the training data.
+    * Extract the `best_estimator_` and print `best_params_`.
+7.  **Evaluate Model:**
+    * Predict on the test set using `best_model.predict(X_test)`.
+    * Calculate and print `accuracy_score`.
+    * Print `classification_report`.
+    * Generate and display a `confusion_matrix` using `seaborn.heatmap`.
+8.  **Result:** Conclude that the SVM model was successfully implemented and optimized for food classification.
 
 ## Program:
-```py
-/*
+```
+
 Program to implement SVM for food classification for diabetic patients.
 Developed by: Abdullah R
 RegisterNumber: 212223230004
-*/
 
 # Import necessary libraries
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -48,8 +46,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Step 1: Load the dataset from the URL
-url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-ML241EN-SkillsNetwork/labs/datasets/food_items_binary.csv"
-data = pd.read_csv(url)
+data = pd.read_csv('food_items_binary.csv')
 
 # Step 2: Data Exploration
 # Display the first few rows and column names for verification
@@ -72,36 +69,56 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# Step 6: Model Training with SVM
-# Define and train the SVM model with predefined parameters
-svm_model = SVC(kernel='rbf', C=1, gamma='scale')
-svm_model.fit(X_train, y_train)
+# Step 6: Model Training with Hyperparameter Tuning using GridSearchCV
+# Define the SVM model
+svm = SVC()
+
+# Set up hyperparameter grid for tuning
+param_grid = {
+    'C': [0.1, 1, 10, 100],              # Regularization parameter
+    'kernel': ['linear', 'rbf'],         # Kernel types
+    'gamma': ['scale', 'auto']           # Kernel coefficient for 'rbf'
+}
+
+# Initialize GridSearchCV
+grid_search = GridSearchCV(svm, param_grid, cv=5, scoring='accuracy')
+grid_search.fit(X_train, y_train)
+
+# Extract the best model
+best_model = grid_search.best_estimator_
+print("Best Parameters:", grid_search.best_params_)
 
 # Step 7: Model Evaluation
-# Predicting on the test set
-y_pred = svm_model.predict(X_test)
+# Predicting on the test set using the best model
+y_pred = best_model.predict(X_test)
 
 # Calculate accuracy and print classification metrics
+print()
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
 print("Classification Report:\n", classification_report(y_test, y_pred))
 
 # Confusion Matrix
 conf_matrix = confusion_matrix(y_test, y_pred)
-sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues", 
-            xticklabels=['Not Suitable', 'Suitable'], yticklabels=['Not Suitable', 'Suitable'])
+sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.title("Confusion Matrix")
 plt.show()
 
-
 ```
 
 ## Output:
-![alt text](image.png)
+### PREVIEW OF THE DATASET:
+![image](https://github.com/user-attachments/assets/18c67136-7844-47a2-9dcd-c55f253c94b0)
+### EXTRACTION OF BEST MODEL:
+![image](https://github.com/user-attachments/assets/eb1d9684-9d1f-4ed1-836e-9abd5ffc5842)
+
+### EVALUATION OF THE MODEL:
+![image](https://github.com/user-attachments/assets/742d5079-d66e-4a61-a4da-aba775b4317a)
+### CONFUSION MATRIX:
+![image](https://github.com/user-attachments/assets/c6efafdc-805e-487b-8208-a6988445676a)
 
 
 ## Result:
 Thus, the SVM model was successfully implemented to classify food items for diabetic patients, with hyperparameter tuning optimizing the model's performance.
-
